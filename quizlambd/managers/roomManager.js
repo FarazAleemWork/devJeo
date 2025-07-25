@@ -1,5 +1,8 @@
 const rooms = require('../data/rooms');
 const { generateRoomCode, generatePlayerId } = require('../utils/idGenerator');
+const { createRoom: createRoomModel } = require('../models/room');
+// This module manages game rooms, allowing players to create, join, and leave rooms.
+// It also provides functionality to get the current state of a room and handle player actions.
 
 /**
  * Create a new room with a non-playing host
@@ -10,16 +13,8 @@ function createRoom(hostName) {
     roomCode = generateRoomCode();
   } while (rooms.getRoom(roomCode));
 
-  const objRoom = {
-    code: roomCode,
-    host: {
-      id: generatePlayerId(),
-      name: hostName
-    },
-    players: [],
-    gameState: 'waiting',
-    board: []
-  };
+  const hostId = generatePlayerId();
+  const objRoom = createRoomModel(roomCode, hostId, hostName);
 
   rooms.setRoom(roomCode, objRoom);
   return objRoom;
