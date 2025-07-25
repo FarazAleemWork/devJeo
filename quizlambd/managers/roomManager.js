@@ -1,6 +1,6 @@
 const rooms = require('../data/rooms');
 const { generateRoomCode, generatePlayerId } = require('../utils/idGenerator');
-
+// This module manages game rooms, allowing players to create, join, and leave rooms.
 /**
  * Create a new room with a non-playing host
  */
