@@ -1,4 +1,4 @@
-const roomManager = require('./managers/roomManager');
+const roomManager = require('./server/managers/roomManager');
 
 // 1. Create room with host
 const room = roomManager.createRoom('Alex');
