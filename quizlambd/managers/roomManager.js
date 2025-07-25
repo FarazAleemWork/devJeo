@@ -10,7 +10,7 @@ function createRoom(hostName) {
     roomCode = generateRoomCode();
   } while (rooms.getRoom(roomCode));
 
-  const room = {
+  const objRoom = {
     code: roomCode,
     host: {
       id: generatePlayerId(),
@@ -21,8 +21,8 @@ function createRoom(hostName) {
     board: []
   };
 
-  rooms.setRoom(roomCode, room);
-  return room;
+  rooms.setRoom(roomCode, objRoom);
+  return objRoom;
 }
 
 /**
