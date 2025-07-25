@@ -11,6 +11,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "nanoid": "^5.1.5"
+    "express": "^5.1.0",
+    "http": "^0.0.1-security",
+    "nanoid": "^5.1.5",
+    "socket.io": "^4.8.1"
   }
 }

@@ -1,3 +1,4 @@
+
 const roomManager = require('./managers/roomManager');
 const gameManager = require('./managers/gameManager');
 const rooms = require('./data/rooms');
@@ -7,6 +8,7 @@ function shiftTime(objRoom, ms) {
   if (objRoom.questionStartTime) objRoom.questionStartTime -= ms;
   if (objRoom.buzzAnswerStartTime) objRoom.buzzAnswerStartTime -= ms;
 }
+
 
 // 1. Create objRoom with host
 let objRoom = roomManager.createRoom('Alex');
