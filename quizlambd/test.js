@@ -27,3 +27,5 @@ console.log('🚪 Player left:', roomManager.getRoomState(room.code));
 const updatedRoom = roomManager.getRoomState(room.code);
 roomManager.leaveRoom(room.code, updatedRoom.host.id);
 console.log('🧹 Host left, room should be gone:', roomManager.getRoomState(room.code));
+
+// git git git 
