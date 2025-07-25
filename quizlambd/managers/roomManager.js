@@ -1,5 +1,5 @@
-const rooms = require('../../data/rooms');
-const { generateRoomCode, generatePlayerId } = require('../../utils/idGenerator');
+const rooms = require('../data/rooms');
+const { generateRoomCode, generatePlayerId } = require('../utils/idGenerator');
 
 /**
  * Create a new room with a non-playing host
