@@ -1,15 +1,15 @@
-function initializeBoard(room) {
+function initializeBoard(objobjRoom) {
   // Example: 3x3 empty board (like for tic-tac-toe)
-  room.board = Array(3).fill(null).map(() => Array(3).fill(null));
+  objobjRoom.board = Array(3).fill(null).map(() => Array(3).fill(null));
 }
 
-function startGame(room) {
-  room.gameState = 'playing';
-  initializeBoard(room);
+function startGame(objobjRoom) {
+  objRoom.gameState = 'playing';
+  initializeBoard(objRoom);
 }
 
-function endGame(room) {
-  room.gameState = 'ended';
+function endGame(objRoom) {
+  objRoom.gameState = 'ended';
 }
 
 module.exports = {
