@@ -1,3 +1,5 @@
+//This file registers socket event handlers for the quizlambd server
+//It imports individual handler functions and sets them up to listen for specific events
 const handleJoinRoom = require('./joinRoom');
 const handleDisconnect = require('./disconnect');
 const handleCreateRoom = require('./createRoom'); 
