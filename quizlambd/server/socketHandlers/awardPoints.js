@@ -1,15 +1,23 @@
-//Only host can award points to players
+const rooms = require('../../data/rooms');
 
-//This function handles awarding points to players in a room
-function handleAwardPoints(socket, data) {
+function handleAwardPoints(io, socket, data) {
   const { roomId, playerId, points } = data;
-  const room = rooms[roomId];
+  const room = rooms.getRoom(roomId);
   if (!room) return;
 
-  //Update score manually, no auto-checking
+  // Ensure only host can award points
+  if (room.hostId !== socket.id) {
+    socket.emit('error', { message: 'Only the host can award points.' });
+    return;
+  }
+
+  // Update scores
   room.gameState.scores = room.gameState.scores || {};
   room.gameState.scores[playerId] = (room.gameState.scores[playerId] || 0) + points;
 
-  //Emit updated scores to all players in the room
+  // Save and emit update
+  rooms.setRoom(roomId, room);
   io.in(roomId).emit('gameStateUpdate', room.gameState);
 }
+
+module.exports = handleAwardPoints;
