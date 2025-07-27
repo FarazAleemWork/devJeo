@@ -163,9 +163,34 @@ function submitAnswer(objRoom, playerId, answer) {
   }
 }
 
+function timeExpired(objRoom) {
+  if (!objRoom || !objRoom.questions) return { error: 'Invalid room state' };
+
+  const nextIndex = objRoom.currentQuestionIndex + 1;
+
+  if (nextIndex >= objRoom.questions.length) {
+    objRoom.status = 'finished';
+    return { gameOver: true, objRoom };
+  }
+
+  objRoom.currentQuestionIndex = nextIndex;
+
+  // Reset timers and buzz state for next question
+  objRoom.questionStartTime = Date.now();
+  objRoom.buzzAnswerStartTime = null;
+  objRoom.buzzOpen = true;
+  objRoom.buzzedPlayers = [];
+  objRoom.buzzedPlayerId = null;
+  objRoom.currentBuzz = null;
+
+  return { objRoom };
+}
+
+
 module.exports = {
   startGame,
   openBuzzing,
   playerBuzz,
-  submitAnswer
+  submitAnswer,
+  timeExpired
 };
