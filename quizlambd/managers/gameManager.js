@@ -1,5 +1,3 @@
-// gameManager.js
-
 function generateQuestions() {
   return [
     {
@@ -33,11 +31,11 @@ function startGame(objRoom) {
   objRoom.status = 'playing';
   objRoom.currentTurn = null;
 
-  // Timer and buzz related initialization
   objRoom.questionStartTime = null;
   objRoom.buzzAnswerStartTime = null;
-  objRoom.buzzTimeoutMs = 7000; // 7 sec to answer after buzzing
-  objRoom.questionTimeoutMs = 30000; // 30 sec total question time
+  objRoom.buzzTimeoutMs = 7000;
+  objRoom.questionTimeoutMs = 30000;
+
   objRoom.buzzedPlayers = [];
   objRoom.buzzOpen = false;
   objRoom.buzzedPlayerId = null;
@@ -57,18 +55,14 @@ function openBuzzing(objRoom) {
 function playerBuzz(objRoom, playerId) {
   const now = Date.now();
 
-  if (!objRoom.buzzOpen) {
-    return { error: 'Buzzing is closed' };
-  }
+  if (!objRoom.buzzOpen) return { error: 'Buzzing is closed' };
 
-  // Check total question time exceeded
   if (now - objRoom.questionStartTime > objRoom.questionTimeoutMs) {
     objRoom.buzzOpen = false;
     objRoom.buzzedPlayerId = null;
     return { error: 'Time is up for this question' };
   }
 
-  // If player already buzzed & answered/skipped, reject
   if (objRoom.buzzedPlayers.includes(playerId)) {
     return { error: 'You already buzzed and answered/skipped' };
   }
@@ -77,10 +71,9 @@ function playerBuzz(objRoom, playerId) {
     return { error: 'Someone already buzzed and is answering' };
   }
 
-  // Accept buzz, start answer timer
   objRoom.buzzedPlayerId = playerId;
   objRoom.buzzAnswerStartTime = now;
-  objRoom.buzzOpen = false; // temporarily close buzz until answer or timeout
+  objRoom.buzzOpen = false;
 
   return { success: true, playerId, objRoom };
 }
@@ -96,12 +89,10 @@ function submitAnswer(objRoom, playerId, answer) {
     return { error: 'Not your turn to answer' };
   }
 
-  // Check if answer time exceeded
   if (now - objRoom.buzzAnswerStartTime > objRoom.buzzTimeoutMs) {
-    // Player timed out
     objRoom.buzzedPlayers.push(playerId);
     objRoom.buzzedPlayerId = null;
-    objRoom.buzzOpen = true; // reopen buzz for others
+    objRoom.buzzOpen = true;
 
     return {
       timeout: true,
@@ -117,12 +108,11 @@ function submitAnswer(objRoom, playerId, answer) {
   const isCorrect = question.correctAnswer === answer;
   if (isCorrect) {
     player.score += 1;
-    // End question immediately
     objRoom.currentQuestionIndex += 1;
+
     objRoom.status = objRoom.currentQuestionIndex >= objRoom.questions.length ? 'ended' : 'playing';
     objRoom.gameStarted = objRoom.status !== 'ended';
 
-    // Reset buzz state
     objRoom.buzzedPlayerId = null;
     objRoom.buzzOpen = false;
     objRoom.buzzAnswerStartTime = null;
@@ -135,11 +125,9 @@ function submitAnswer(objRoom, playerId, answer) {
       objRoom
     };
   } else {
-    // Wrong answer — allow other players to buzz (if time left)
     objRoom.buzzedPlayers.push(playerId);
     objRoom.buzzedPlayerId = null;
 
-    // Check if total question time exceeded
     if (now - objRoom.questionStartTime > objRoom.questionTimeoutMs) {
       objRoom.buzzOpen = false;
       objRoom.status = objRoom.currentQuestionIndex >= objRoom.questions.length ? 'ended' : 'playing';
@@ -152,7 +140,7 @@ function submitAnswer(objRoom, playerId, answer) {
         objRoom
       };
     } else {
-      objRoom.buzzOpen = true; // reopen buzz for remaining players
+      objRoom.buzzOpen = true;
       return {
         correct: false,
         questionEnded: false,
@@ -163,9 +151,65 @@ function submitAnswer(objRoom, playerId, answer) {
   }
 }
 
+//selectQuestion FUNCTION
+function selectQuestion(objRoom, questionIndex, hostId, io) {
+  if (!objRoom.host || objRoom.host.id !== hostId) {
+    return { error: 'Only the host can select questions.' };
+  }
+
+  if (!objRoom.questions || questionIndex >= objRoom.questions.length) {
+    return { error: 'Invalid question index.' };
+  }
+
+  objRoom.currentQuestionIndex = questionIndex;
+  objRoom.status = 'playing';
+  objRoom.questionStartTime = Date.now();
+  objRoom.buzzedPlayers = [];
+  objRoom.buzzOpen = true;
+  objRoom.buzzedPlayerId = null;
+
+  // Clear existing timer if any
+  if (objRoom.questionTimer) {
+    clearTimeout(objRoom.questionTimer);
+  }
+
+  // Start auto-end timer for question
+  objRoom.questionTimer = setTimeout(() => {
+    objRoom.buzzOpen = false;
+    objRoom.buzzedPlayerId = null;
+    io.to(objRoom.code).emit('questionTimedOut', {
+      message: 'Time is up for this question!',
+      room: objRoom
+    });
+  }, objRoom.questionTimeoutMs);
+
+  return { success: true, objRoom };
+
+}
+  //end game 
+function endGame(objRoom) {
+  objRoom.status = 'ended';
+  objRoom.gameStarted = false;
+  objRoom.buzzOpen = false;
+  objRoom.buzzedPlayerId = null;
+  objRoom.buzzedPlayers = [];
+  objRoom.questionStartTime = null;
+  objRoom.buzzAnswerStartTime = null;
+
+  if (objRoom.questionTimer) {
+    clearTimeout(objRoom.questionTimer);
+    objRoom.questionTimer = null;
+  }
+
+  return { success: true, message: 'Game has ended', objRoom };
+}
+
+
 module.exports = {
   startGame,
   openBuzzing,
   playerBuzz,
-  submitAnswer
+  submitAnswer,
+  selectQuestion,
+  endGame
 };
