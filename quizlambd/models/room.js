@@ -1,10 +1,10 @@
 // /models/room.js
 function createRoom(roomCode, hostId, hostName) {
   return {
-    code: roomCode,
+    roomCode,
     host: {
       id: hostId,
-      name: hostName
+      name: hostName,
     },
     players: [],
     gameState: 'waiting',
