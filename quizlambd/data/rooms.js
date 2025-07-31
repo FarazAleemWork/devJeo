@@ -1,5 +1,5 @@
 // /data/rooms.js
-const rooms = {};  // { [roomCode]: roomObject }
+const rooms = {};  // { [objRoomCode]: objRoomObject }
 
 module.exports = {
   getRoom: (code) => rooms[code],
