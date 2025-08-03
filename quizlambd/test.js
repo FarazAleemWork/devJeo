@@ -1,6 +1,6 @@
 
-const roomManager = require('./managers/roomManager');
-const gameManager = require('./managers/gameManager');
+const roomManager = require('./server/managers/roomManager');
+const gameManager = require('./server/managers/gameManager');
 const rooms = require('./data/rooms');
 
 // Helper to manually shift the internal timestamps by ms
@@ -15,8 +15,10 @@ let objRoom = roomManager.createRoom('Alex');
 console.log('✅ objRoom created:', objRoom);
 
 // 2. Players join
-const player1 = roomManager.joinRoom(objRoom.code, 'John');
-const player2 = roomManager.joinRoom(objRoom.code, 'Jane');
+const player1 = roomManager.joinRoom(objRoom.roomCode, 'John');
+const player2 = roomManager.joinRoom(objRoom.roomCode, 'Jane');
+console.log('player1:', player1);
+console.log('player2:', player2);
 console.log('✅ Players joined:', player1.player.name, player2.player.name);
 
 // 3. Start the game
