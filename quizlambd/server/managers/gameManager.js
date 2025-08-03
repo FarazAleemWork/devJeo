@@ -1,23 +1,35 @@
+// Constants
+const BUZZ_TIMEOUT_MS = 7000;
+const QUESTION_TIMEOUT_MS = 30000;
+
+/**
+ * Generates a set of questions for the game.
+ * @returns {Array} - Array of question objects.
+ */
 function generateQuestions() {
   return [
-    {
-      question: "What is the capital of France?",
-      options: ["Paris", "Berlin", "Rome", "Madrid"],
-      correctAnswer: "Paris"
-    },
-    {
-      question: "What is 2 + 2?",
-      options: ["3", "4", "5", "6"],
-      correctAnswer: "4"
-    },
-    {
-      question: "What color is the sky?",
-      options: ["Blue", "Green", "Red", "Yellow"],
-      correctAnswer: "Blue"
-    }
+    { question: "What is the capital of France?", options: ["Paris", "Berlin", "Rome", "Madrid"], correctAnswer: "Paris" },
+    { question: "What is 2 + 2?", options: ["3", "4", "5", "6"], correctAnswer: "4" },
+    { question: "What color is the sky?", options: ["Blue", "Green", "Red", "Yellow"], correctAnswer: "Blue" }
   ];
 }
 
+/**
+ * Resets the buzz state for the room.
+ * @param {Object} objRoom - The room object.
+ */
+function resetBuzzState(objRoom) {
+  objRoom.buzzOpen = false;
+  objRoom.buzzedPlayerId = null;
+  objRoom.buzzedPlayers = [];
+  objRoom.buzzAnswerStartTime = null;
+}
+
+/**
+ * Starts the game by initializing the room state.
+ * @param {Object} objRoom - The room object.
+ * @returns {Object} - Updated room object or error.
+ */
 function startGame(objRoom) {
   objRoom.questions = generateQuestions();
   objRoom.gameStarted = true;
@@ -30,19 +42,19 @@ function startGame(objRoom) {
 
   objRoom.status = 'playing';
   objRoom.currentTurn = null;
-
   objRoom.questionStartTime = null;
-  objRoom.buzzAnswerStartTime = null;
-  objRoom.buzzTimeoutMs = 7000;
-  objRoom.questionTimeoutMs = 30000;
-
-  objRoom.buzzedPlayers = [];
-  objRoom.buzzOpen = false;
-  objRoom.buzzedPlayerId = null;
+  objRoom.buzzTimeoutMs = BUZZ_TIMEOUT_MS;
+  objRoom.questionTimeoutMs = QUESTION_TIMEOUT_MS;
+  resetBuzzState(objRoom);
 
   return { objRoom };
 }
 
+/**
+ * Opens buzzing for the current question.
+ * @param {Object} objRoom - The room object.
+ * @returns {Object} - Updated room object.
+ */
 function openBuzzing(objRoom) {
   objRoom.buzzOpen = true;
   objRoom.buzzedPlayerId = null;
@@ -52,14 +64,19 @@ function openBuzzing(objRoom) {
   return objRoom;
 }
 
+/**
+ * Handles a player's buzz.
+ * @param {Object} objRoom - The room object.
+ * @param {string} playerId - The ID of the player buzzing.
+ * @returns {Object} - Result of the buzz attempt.
+ */
 function playerBuzz(objRoom, playerId) {
   const now = Date.now();
 
   if (!objRoom.buzzOpen) return { error: 'Buzzing is closed' };
 
   if (now - objRoom.questionStartTime > objRoom.questionTimeoutMs) {
-    objRoom.buzzOpen = false;
-    objRoom.buzzedPlayerId = null;
+    resetBuzzState(objRoom);
     return { error: 'Time is up for this question' };
   }
 
@@ -78,6 +95,13 @@ function playerBuzz(objRoom, playerId) {
   return { success: true, playerId, objRoom };
 }
 
+/**
+ * Submits an answer for the current question.
+ * @param {Object} objRoom - The room object.
+ * @param {string} playerId - The ID of the player submitting the answer.
+ * @param {string} answer - The player's answer.
+ * @returns {Object} - Result of the answer submission.
+ */
 function submitAnswer(objRoom, playerId, answer) {
   const now = Date.now();
 
@@ -91,14 +115,9 @@ function submitAnswer(objRoom, playerId, answer) {
 
   if (now - objRoom.buzzAnswerStartTime > objRoom.buzzTimeoutMs) {
     objRoom.buzzedPlayers.push(playerId);
-    objRoom.buzzedPlayerId = null;
+    resetBuzzState(objRoom);
     objRoom.buzzOpen = true;
-
-    return {
-      timeout: true,
-      message: 'Answer time expired, buzzing reopened',
-      objRoom
-    };
+    return { timeout: true, message: 'Answer time expired, buzzing reopened', objRoom };
   }
 
   const question = objRoom.questions[objRoom.currentQuestionIndex];
@@ -109,49 +128,25 @@ function submitAnswer(objRoom, playerId, answer) {
   if (isCorrect) {
     player.score += 1;
     objRoom.currentQuestionIndex += 1;
-
     objRoom.status = objRoom.currentQuestionIndex >= objRoom.questions.length ? 'ended' : 'playing';
     objRoom.gameStarted = objRoom.status !== 'ended';
-
-    objRoom.buzzedPlayerId = null;
-    objRoom.buzzOpen = false;
-    objRoom.buzzAnswerStartTime = null;
-    objRoom.buzzedPlayers = [];
-
-    return {
-      correct: true,
-      questionEnded: true,
-      isGameOver: objRoom.status === 'ended',
-      objRoom
-    };
-  } else {
-    objRoom.buzzedPlayers.push(playerId);
-    objRoom.buzzedPlayerId = null;
-
-    if (now - objRoom.questionStartTime > objRoom.questionTimeoutMs) {
-      objRoom.buzzOpen = false;
-      objRoom.status = objRoom.currentQuestionIndex >= objRoom.questions.length ? 'ended' : 'playing';
-      objRoom.gameStarted = objRoom.status !== 'ended';
-
-      return {
-        correct: false,
-        questionEnded: true,
-        isGameOver: objRoom.status === 'ended',
-        objRoom
-      };
-    } else {
-      objRoom.buzzOpen = true;
-      return {
-        correct: false,
-        questionEnded: false,
-        message: 'Wrong answer, buzzing reopened',
-        objRoom
-      };
-    }
+    resetBuzzState(objRoom);
+    return { correct: true, questionEnded: true, isGameOver: objRoom.status === 'ended', objRoom };
   }
+
+  objRoom.buzzedPlayers.push(playerId);
+  objRoom.buzzOpen = true;
+  return { correct: false, questionEnded: false, message: 'Wrong answer, buzzing reopened', objRoom };
 }
 
-//selectQuestion FUNCTION
+/**
+ * Selects a question for the game.
+ * @param {Object} objRoom - The room object.
+ * @param {number} questionIndex - The index of the question to select.
+ * @param {string} hostId - The ID of the host selecting the question.
+ * @param {Object} io - The socket.io instance for broadcasting events.
+ * @returns {Object} - Result of the question selection.
+ */
 function selectQuestion(objRoom, questionIndex, hostId, io) {
   if (!objRoom.host || objRoom.host.id !== hostId) {
     return { error: 'Only the host can select questions.' };
@@ -164,19 +159,15 @@ function selectQuestion(objRoom, questionIndex, hostId, io) {
   objRoom.currentQuestionIndex = questionIndex;
   objRoom.status = 'playing';
   objRoom.questionStartTime = Date.now();
-  objRoom.buzzedPlayers = [];
+  resetBuzzState(objRoom);
   objRoom.buzzOpen = true;
-  objRoom.buzzedPlayerId = null;
 
-  // Clear existing timer if any
   if (objRoom.questionTimer) {
     clearTimeout(objRoom.questionTimer);
   }
 
-  // Start auto-end timer for question
   objRoom.questionTimer = setTimeout(() => {
-    objRoom.buzzOpen = false;
-    objRoom.buzzedPlayerId = null;
+    resetBuzzState(objRoom);
     io.to(objRoom.code).emit('questionTimedOut', {
       message: 'Time is up for this question!',
       room: objRoom
@@ -184,17 +175,18 @@ function selectQuestion(objRoom, questionIndex, hostId, io) {
   }, objRoom.questionTimeoutMs);
 
   return { success: true, objRoom };
-
 }
-  //end game 
+
+/**
+ * Ends the game and resets the room state.
+ * @param {Object} objRoom - The room object.
+ * @returns {Object} - Result of the game end.
+ */
 function endGame(objRoom) {
   objRoom.status = 'ended';
   objRoom.gameStarted = false;
-  objRoom.buzzOpen = false;
-  objRoom.buzzedPlayerId = null;
-  objRoom.buzzedPlayers = [];
+  resetBuzzState(objRoom);
   objRoom.questionStartTime = null;
-  objRoom.buzzAnswerStartTime = null;
 
   if (objRoom.questionTimer) {
     clearTimeout(objRoom.questionTimer);
@@ -203,7 +195,6 @@ function endGame(objRoom) {
 
   return { success: true, message: 'Game has ended', objRoom };
 }
-
 
 module.exports = {
   startGame,

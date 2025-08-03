@@ -28,7 +28,7 @@ if (startResult.error) {
   process.exit(1);
 }
 objRoom = startResult.objRoom;
-rooms.setRoom(objRoom.code, objRoom);
+rooms.setRoom(objRoom.roomCode, objRoom);
 console.log('▶️ Game started:', objRoom.status);
 
 // 4. Open buzzing for first question

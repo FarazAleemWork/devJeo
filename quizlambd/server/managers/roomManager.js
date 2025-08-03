@@ -4,7 +4,18 @@ const { createRoom: createRoomModel } = require('../../models/room');
 const gameManager = require('./gameManager'); // Needed for endGame()
 
 /**
- * Create a new room with a host and initial config
+ * Retrieves a room by its code.
+ * @param {string} roomCode - The code of the room to retrieve.
+ * @returns {Object|null} - The room object or null if not found.
+ */
+function getRoom(roomCode) {
+  return rooms.getRoom(roomCode) || null;
+}
+
+/**
+ * Creates a new room with a host and initial configuration.
+ * @param {string} hostName - The name of the host.
+ * @returns {Object} - The created room object.
  */
 function createRoom(hostName) {
   let roomCode;
@@ -13,28 +24,31 @@ function createRoom(hostName) {
   } while (rooms.getRoom(roomCode));
 
   const hostId = generatePlayerId();
-  const objRoom = createRoomModel(roomCode, hostId, hostName);
+  const room = createRoomModel(roomCode, hostId, hostName);
 
   // Add extra properties for tracking disconnections
-  objRoom.hostDisconnected = false;
+  room.hostDisconnected = false;
 
-  rooms.setRoom(roomCode, objRoom);
-  return objRoom;
+  rooms.setRoom(roomCode, room);
+  return room;
 }
 
 /**
- * Player joins a room
+ * Adds a player to a room.
+ * @param {string} roomCode - The code of the room.
+ * @param {string} name - The name of the player.
+ * @returns {Object} - The updated room and player details, or an error object.
  */
 function joinRoom(roomCode, name) {
-  const room = rooms.getRoom(roomCode);
+  const room = getRoom(roomCode);
   if (!room) return { error: 'Room not found' };
 
   if (room.host.name === name) {
     return { error: 'Name already taken by host' };
   }
 
-  const isDuplicate = room.players.find(p => p.name === name);
-  if (isDuplicate) {
+  const isNameTaken = room.players.some(p => p.name === name);
+  if (isNameTaken) {
     return { error: 'Name already taken' };
   }
 
@@ -51,11 +65,14 @@ function joinRoom(roomCode, name) {
 }
 
 /**
- * Mark a player as disconnected (soft disconnect)
+ * Marks a player as disconnected (soft disconnect).
+ * @param {string} roomCode - The code of the room.
+ * @param {string} playerId - The ID of the player to mark as disconnected.
+ * @returns {Object|null} - The updated room or null if the room is not found.
  */
 function markPlayerDisconnected(roomCode, playerId) {
-  const room = rooms.getRoom(roomCode);
-  if (!room) return;
+  const room = getRoom(roomCode);
+  if (!room) return null;
 
   if (room.host.id === playerId) {
     room.hostDisconnected = true;
@@ -66,13 +83,17 @@ function markPlayerDisconnected(roomCode, playerId) {
     }
   }
   rooms.setRoom(roomCode, room);
+  return room;
 }
 
 /**
- * Remove a player from the room permanently (full leave)
+ * Removes a player from the room permanently (full leave).
+ * @param {string} roomCode - The code of the room.
+ * @param {string} playerId - The ID of the player to remove.
+ * @returns {Object|null} - The updated room or null if the room is deleted.
  */
 function leaveRoom(roomCode, playerId) {
-  const room = rooms.getRoom(roomCode);
+  const room = getRoom(roomCode);
   if (!room) return null;
 
   // If host leaves, delete the room immediately
@@ -96,10 +117,13 @@ function leaveRoom(roomCode, playerId) {
 }
 
 /**
- * Handle player reconnect by playerId
+ * Handles player reconnect by playerId.
+ * @param {string} roomCode - The code of the room.
+ * @param {string} playerId - The ID of the player reconnecting.
+ * @returns {Object} - The updated room and player details, or an error object.
  */
 function reconnectPlayer(roomCode, playerId) {
-  const room = rooms.getRoom(roomCode);
+  const room = getRoom(roomCode);
   if (!room) return { error: 'Room not found' };
 
   if (room.host.id === playerId) {
@@ -117,18 +141,22 @@ function reconnectPlayer(roomCode, playerId) {
 }
 
 /**
- * Check if host is disconnected
+ * Checks if the host is disconnected.
+ * @param {string} roomCode - The code of the room.
+ * @returns {boolean} - True if the host is disconnected, false otherwise.
  */
 function isHostDisconnected(roomCode) {
-  const room = rooms.getRoom(roomCode);
+  const room = getRoom(roomCode);
   return room ? room.hostDisconnected === true : false;
 }
 
 /**
- * Get the current room state
+ * Retrieves the current room state.
+ * @param {string} roomCode - The code of the room.
+ * @returns {Object} - The room state or an error object.
  */
 function getRoomState(roomCode) {
-  const room = rooms.getRoom(roomCode);
+  const room = getRoom(roomCode);
   return room ? room : { error: 'Room not found' };
 }
 
