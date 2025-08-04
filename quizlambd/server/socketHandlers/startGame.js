@@ -1,7 +1,7 @@
 const rooms = require('../../data/rooms');
 const gameManager = require('../managers/gameManager');
 
-module.exports = function handleStartGame(socket, data) {
+module.exports = function handleStartGame(socket, data, callback) {
   const { roomCode } = data;
   let objRoom = rooms.getRoom(roomCode);
 
@@ -19,5 +19,8 @@ module.exports = function handleStartGame(socket, data) {
     rooms.setRoom(roomCode, objRoom);
     socket.to(roomCode).emit('gameStarted', objRoom);
     socket.emit('gameStarted', objRoom); // Send to host
+
+    callback({ success: true, room: objRoom });
+    console.log(`Game started in room ${roomCode}`);
   }
 };

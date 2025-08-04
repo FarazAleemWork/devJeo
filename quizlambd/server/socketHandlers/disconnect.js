@@ -1,4 +1,4 @@
-const rooms = require('../data/rooms');
+const rooms = require('../../data/rooms');
 const roomManager = require('../managers/roomManager');
 const gameManager = require('../managers/gameManager');
 

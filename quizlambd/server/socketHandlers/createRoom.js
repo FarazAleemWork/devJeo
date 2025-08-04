@@ -3,13 +3,15 @@ const generateRoomId = require('../../utils/idGenerator');
 
 const roomManager = require('../managers/roomManager');
 
-function handleCreateRoom(socket, data) {
-  const room = roomManager.createRoom(data.playerName, socket.id);
+function handleCreateRoom(socket, data, callback) {
+  console.log(socket.id)
+  const room = roomManager.createRoom(socket.id, data.playerName);
 
-  socket.join(room.code);
-  socket.emit('roomCreated', { roomId: room.code });
+  socket.join(room.roomCode);
+  socket.emit('roomCreated', { roomId: room.roomCode });
 
-  console.log(`Room created: ${room.code} by ${socket.id}`);
+  callback({ room, player: room.host });
+  console.log(`Room created: ${room.roomCode} by ${socket.id}`);
 }
 
 

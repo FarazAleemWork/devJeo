@@ -1,7 +1,7 @@
 const roomManager = require('../managers/roomManager');
 
-function handleJoinRoom(socket, data) {
-  const joinResult = roomManager.joinRoom(data.roomCode, data.name, socket.id);
+function handleJoinRoom(socket, data, callback) {
+  const joinResult = roomManager.joinRoom(data.roomCode, data.playerName, socket.id);
 
   if (joinResult.error) {
     socket.emit('error', { message: joinResult.error });
@@ -17,9 +17,10 @@ function handleJoinRoom(socket, data) {
   socket.to(data.roomCode).emit('roomUpdated', { room });
 
   socket.data.roomCode = data.roomCode;
-  socket.data.playerName = data.name;
+  socket.data.playerName = data.playerName;
   
-  console.log(`${data.name} successfully joined room ${data.roomCode}`);
+  callback({ room, player });
+  console.log(`${data.playerName} successfully joined room ${data.roomCode}`);
 }
 
 module.exports = handleJoinRoom;

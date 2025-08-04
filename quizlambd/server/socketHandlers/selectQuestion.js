@@ -1,4 +1,4 @@
-const { getRoomByCode, setRoom } = require('../data/rooms');
+const { getRoomByCode, setRoom } = require('../../data/rooms');
 const { openBuzzing } = require('../managers/gameManager');
 
 module.exports = function handleSelectQuestion(io, socket) {
