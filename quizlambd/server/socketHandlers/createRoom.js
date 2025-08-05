@@ -12,6 +12,7 @@ function handleCreateRoom(socket, data, callback) {
 
   callback({ room, player: room.host });
   console.log(`Room created: ${room.roomCode} by ${socket.id}`);
+  console.log('Generated Room Code:', room.roomCode);
 }
 
 

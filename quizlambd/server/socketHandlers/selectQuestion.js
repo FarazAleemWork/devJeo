@@ -1,9 +1,9 @@
-const { getRoomByCode, setRoom } = require('../../data/rooms');
+const { getRoom, setRoom } = require('../../data/rooms');
 const { openBuzzing } = require('../managers/gameManager');
 
-module.exports = function handleSelectQuestion(io, socket) {
+module.exports = function handleSelectQuestion(io, socket, callback) {
   socket.on('selectQuestion', ({ roomCode, questionIndex }) => {
-    const room = getRoomByCode(roomCode);
+    const room = getRoom(roomCode);
     if (!room) return socket.emit('errorMessage', 'Room not found');
 
     // Only host can select a question
@@ -28,7 +28,10 @@ module.exports = function handleSelectQuestion(io, socket) {
       question: room.questions[questionIndex],
       index: questionIndex
     });
-
+    
+    callback({ success: true });
+    console.log(`Question ${questionIndex} selected in room ${roomCode}`);
+    
     // Save updated room
     setRoom(roomCode, room);
 

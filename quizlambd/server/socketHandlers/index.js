@@ -11,15 +11,16 @@ const handleSelectQuestion = require('./selectQuestion');
 const handleReconnect = require('./reconnect');
 
 
+
 module.exports = function registerSocketHandlers(socket) {
   socket.on('joinRoom', (data, callback) => handleJoinRoom(socket, data, callback));
   socket.on('disconnect', () => handleDisconnect(socket));
   socket.on('createRoom', (data, callback) => handleCreateRoom(socket, data, callback));
   socket.on('awardPoints', (data) => handleAwardPoints(io, socket, data));
-  socket.on('buzzIn', (data) => handleBuzzIn(io, socket, data));
-  socket.on('startGame', (data) => handleStartGame(socket, data));
+  socket.on('buzzIn', (data, callback) => handleBuzzIn(io, socket, data, callback));
+  socket.on('startGame', (data, callback) => handleStartGame(socket, data, callback));
   socket.on('timerExpired', (data) => handleTimerExpired(socket, data));
-  socket.on('selectQuestion', (data) => handleSelectQuestion(io,socket, data));
   socket.on('reconnectPlayer', (data) => handleReconnect(socket, data));
+  socket.on('selectQuestion', (data, callback) => handleSelectQuestion(io, socket, callback))
 }; 
 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quizlam Basic Frontend</title>
+</head>
+<body>
+  <h1>DevJeo Test Panel</h1>
+
+  <input type="text" id="playerName" placeholder="Enter name" />
+</br>
+  <button onclick="createRoom()">Create Room</button>
+  <button onclick="joinRoom()">Join Room</button>
+
+<input type="text" id="roomCode" placeholder="Enter room code" />
+
+  <hr />
+  <button onclick="selectQuestion()">Select Question</button></br>
+  <button onclick="startGame()">Start Game</button>
+  <button onclick="buzzIn()">Buzz In</button>
+  <input type="text" id="answerText" placeholder="Your Answer" />
+  <button onclick="submitAnswer()">Submit Answer</button>
+
+  <hr />
+
+  <input type="number" id="pointsToAward" placeholder="Points" />
+  <button onclick="awardPoints()">Award Points</button>
+
+  <button onclick="simulateDisconnect()">Disconnect</button>
+
+  <hr />
+
+  <pre id="log"></pre>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io(); // connects to backend
+
+    let playerId = null;
+    let roomCode = null;
+
+    function log(msg) {
+      const pre = document.getElementById('log');
+      pre.textContent += msg + '\n';
+      pre.scrollTop = pre.scrollHeight;
+    }
+
+    function createRoom() {
+      const name = document.getElementById('playerName').value;
+      log('Creating room, host: ' + name);
+      
+      socket.emit('createRoom', { playerName: name }, (res) => {
+        log('Response: ' + JSON.stringify(res));
+        if (res.error) return log('❌ ' + res.error);
+        playerId = res.player.id;
+        roomCode = res.room.roomCode;
+        document.getElementById('roomCode').value = roomCode;
+        Console.log('created: ' + roomCode + 'by' + playerId )
+      });
+    }
+
+    function joinRoom() {
+      const name = document.getElementById('playerName').value;
+      const code = document.getElementById('roomCode').value;
+      socket.emit('joinRoom', { roomCode: code, playerName: name }, (res) => {
+        if (res.error) return log('❌ ' + res.error);
+        playerId = res.player.id;
+        roomCode = res.room.roomCode;
+
+        log('✅ Joined room: ' + ' Code: ' +code + ' Name: ' + name);
+      });
+    }
+
+    function startGame() {
+      socket.emit('startGame', { roomCode }, (res) => {
+        if (res.error) return log('❌ ' + res.error);
+        log('▶️ Game started!');
+      });
+    }
+
+    
+    function selectQuestion() {
+      onsole.log('Select Question button clicked'); // Debugging log
+  const questionIndex = prompt('Enter question index (0, 1, 2, ...):');
+  if (questionIndex === null || questionIndex === '') {
+    console.log('No question index entered'); // Debugging log
+    return;
+  }
+  console.log('Room Code:', roomCode);
+  console.log('Question Index:', questionIndex);
+
+  
+      socket.emit('selectQuestion', { roomCode, questionIndex: parseInt(questionIndex) }, (res) => {
+        if (res.error) {
+          log('❌ ' + res.error);
+          return;
+        }
+        log('✅ Question selected: ' + questionIndex);
+      });
+    }
+
+    function buzzIn() {
+      socket.emit('buzzIn', { roomCode, playerId }, (res) => {
+        if (res.error) return log('❌ ' + res.error);
+        log('🔔 Buzzed in!');
+      });
+    }
+
+    function submitAnswer() {
+      const answer = document.getElementById('answerText').value;
+      socket.emit('submitAnswer', { roomCode, playerId, answer }, (res) => {
+        if (res.timeout) return log('⏰ Timeout: ' + res.message);
+        if (res.correct) log('✅ Correct Answer!');
+        else if (res.error) log('❌ ' + res.error);
+        else log('❌ Wrong Answer!');
+      });
+    }
+
+    function awardPoints() {
+      const points = parseInt(document.getElementById('pointsToAward').value);
+      if (isNaN(points)) return log('❌ Invalid point value');
+      socket.emit('awardPoints', { roomCode, playerId, points }, (res) => {
+        if (res.error) return log('❌ ' + res.error);
+        log('🏅 Awarded ' + points + ' points!');
+      });
+    }
+
+    function simulateDisconnect() {
+      socket.disconnect();
+      log('🔌 Disconnected from server');
+    }
+
+    // 🔔 Server events
+    socket.on('questionSelected', (data) => log('❓ Question selected: ' + JSON.stringify(data.question)));
+    socket.on('questionEnded', (data) => log('⏰ Question ended: ' + data.reason));
+    socket.on('gameOver', (data) => log('🏁 Game over! Winner: ' + data.winner));
+    socket.on('nextQuestion', (data) => log('➡️ Next question: ' + data.question));
+    socket.on('playerJoined', (data) => log('👥 New player joined: ' + data.player.name));
+    socket.on('playerBuzzed', (data) => log('🟡 Buzzed: ' + data.player.name));
+    socket.on('playerAnswered', (data) => log('🗣️ Answered: ' + data.player.name));
+    socket.on('pointsAwarded', (data) => log('🏆 Points awarded: ' + data.points + ' to ' + data.player.name));
+    socket.on('error', (err) => log('❌ Error: ' + err.message));
+    socket.on('connect', () => log('✅ Connected to server'));
+    socket.on('disconnect', () => log('❌ Disconnected from server'));
+    socket.on('reconnect_attempt', () => log('🔄 Attempting to reconnect...'));
+    socket.on('reconnect', (attempt) => log('✅ Reconnected after ' + attempt + ' attempts'));
+    socket.on('reconnect_error', (err) => log('❌ Reconnect error: ' + err.message));
+    socket.on('reconnect_failed', () => log('❌ Reconnect failed'));
+
+
+
+    // Optional reconnect logic
+    socket.on('disconnect', () => log('❌ Disconnected'));
+    socket.on('connect', () => log('✅ Reconnected'));
+  </script>
+</body>
+</html>
