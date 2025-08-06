@@ -3,13 +3,13 @@ function initializeBoard(objobjRoom) {
   objobjRoom.board = Array(3).fill(null).map(() => Array(3).fill(null));
 }
 
-function startGame(objobjRoom) {
-  objRoom.gameState = 'playing';
+function startGame(objRoom) {
+  objRoom.gameState.status = 'playing';
   initializeBoard(objRoom);
 }
 
 function endGame(objRoom) {
-  objRoom.gameState = 'ended';
+  objRoom.gameState.status = 'ended';
 }
 
 module.exports = {

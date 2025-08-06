@@ -16,11 +16,11 @@ module.exports = function registerSocketHandlers(socket) {
   socket.on('joinRoom', (data, callback) => handleJoinRoom(socket, data, callback));
   socket.on('disconnect', () => handleDisconnect(socket));
   socket.on('createRoom', (data, callback) => handleCreateRoom(socket, data, callback));
-  socket.on('awardPoints', (data) => handleAwardPoints(io, socket, data));
+  socket.on('awardPoints', (data, callback) => handleAwardPoints(io, socket, data, callback));
   socket.on('buzzIn', (data, callback) => handleBuzzIn(io, socket, data, callback));
   socket.on('startGame', (data, callback) => handleStartGame(socket, data, callback));
   socket.on('timerExpired', (data) => handleTimerExpired(socket, data));
   socket.on('reconnectPlayer', (data) => handleReconnect(socket, data));
-  socket.on('selectQuestion', (data, callback) => handleSelectQuestion(io, socket, callback))
+  socket.on('selectQuestion', (data, callback) => handleSelectQuestion(io, socket, data, callback))
 }; 
 

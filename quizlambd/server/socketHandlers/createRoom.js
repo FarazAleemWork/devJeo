@@ -4,7 +4,7 @@ const generateRoomId = require('../../utils/idGenerator');
 const roomManager = require('../managers/roomManager');
 
 function handleCreateRoom(socket, data, callback) {
-  console.log(socket.id)
+  console.log(data)
   const room = roomManager.createRoom(socket.id, data.playerName);
 
   socket.join(room.roomCode);
