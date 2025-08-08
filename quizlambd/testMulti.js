@@ -1,4 +1,4 @@
-const { startGame, selectQuestion, playerBuzz, submitAnswer, endGame } = require('./managers/gameManager');
+const { startGame, selectQuestion, playerBuzz, submitAnswer, endGame } = require('./server/managers/gameManager');
 
 // Mock in-memory room store
 const rooms = {};
