@@ -1,4 +1,4 @@
-const rooms = require('../data/rooms');
+const rooms = require('../../data/rooms');
 const roomManager = require('../managers/roomManager');
 
 const hostReconnectTimers = require('./disconnect').hostReconnectTimers;

@@ -7,7 +7,10 @@ function createRoom(roomCode, hostId, hostName) {
       name: hostName,
     },
     players: [],
-    gameState: 'waiting',
+     gameState: {
+      status: 'waiting',     
+      scores: {},            
+    },
     board: [],
     gameStarted: false,
     currentQuestionIndex: 0,

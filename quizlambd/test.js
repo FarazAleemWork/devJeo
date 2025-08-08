@@ -17,8 +17,11 @@ console.log('✅ objRoom created:', objRoom);
 // 2. Players join
 const player1 = roomManager.joinRoom(objRoom.roomCode, 'John');
 const player2 = roomManager.joinRoom(objRoom.roomCode, 'Jane');
+<<<<<<< HEAD
+=======
 console.log('player1:', player1);
 console.log('player2:', player2);
+>>>>>>> caa87f071ae841a13933c9f142d6390013634eda
 console.log('✅ Players joined:', player1.player.name, player2.player.name);
 
 // 3. Start the game

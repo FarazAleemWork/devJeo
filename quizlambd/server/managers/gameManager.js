@@ -128,6 +128,7 @@ function submitAnswer(objRoom, playerId, answer) {
   if (isCorrect) {
     player.score += 1;
     objRoom.currentQuestionIndex += 1;
+
     objRoom.status = objRoom.currentQuestionIndex >= objRoom.questions.length ? 'ended' : 'playing';
     objRoom.gameStarted = objRoom.status !== 'ended';
     resetBuzzState(objRoom);

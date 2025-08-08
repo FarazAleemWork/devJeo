@@ -160,6 +160,13 @@ function getRoomState(roomCode) {
   return room ? room : { error: 'Room not found' };
 }
 
+/**
+ * Get room details by room code
+ */
+function getRoom(roomCode) {
+  return rooms.getRoom(roomCode); // Delegate to rooms.js
+}
+
 module.exports = {
   createRoom,
   joinRoom,

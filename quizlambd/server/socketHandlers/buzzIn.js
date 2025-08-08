@@ -1,13 +1,15 @@
 const rooms = require('../../data/rooms');
 const { playerBuzz } = require('../managers/gameManager');
 
-function handleBuzzIn(io, socket, data) {
-  const { roomId } = data;
-  const playerId = socket.id;
+function handleBuzzIn(io, socket, data, callback) {
+  const { roomCode, playerId } = data;
+  const room = rooms.getRoom(roomCode);
+  //const playerId = socket.id;
 
-  const room = rooms.getRoom(roomId);
   if (!room) {
     socket.emit('buzzRejected', { message: 'Room not found' });
+    callback({ error: 'Room not found' });
+    console.log(`Buzz in failed: Room ${roomCode} not found`);
     return;
   }
 
@@ -15,12 +17,17 @@ function handleBuzzIn(io, socket, data) {
 
   if (result.error) {
     socket.emit('buzzRejected', { message: result.error });
+    callback({ error: result.error });
+    console.log(`Buzz in failed for player ${playerId} in room ${roomCode}: ${result.error}`);
     return;
   }
 
   // Update room and broadcast buzz success
-  rooms.setRoom(roomId, result.objRoom);
-  io.in(roomId).emit('playerBuzzed', { playerId });
+  rooms.setRoom(roomCode, result.objRoom);
+  io.in(roomCode).emit('playerBuzzed', { playerId });
+
+  callback({ success: true, playerId });
+  console.log(`Player ${playerId} buzzed in room ${roomCode}`);
 }
 
 module.exports = handleBuzzIn;
