@@ -14,7 +14,7 @@ const handleReconnect = require('./reconnect');
 
 module.exports = function registerSocketHandlers(socket) {
   socket.on('joinRoom', (data, callback) => handleJoinRoom(socket, data, callback));
-  socket.on('disconnect', () => handleDisconnect(socket));
+  socket.on('disconnect', (callback) => handleDisconnect(socket, callback));
   socket.on('createRoom', (data, callback) => handleCreateRoom(socket, data, callback));
   socket.on('awardPoints', (data, callback) => handleAwardPoints(io, socket, data, callback));
   socket.on('buzzIn', (data, callback) => handleBuzzIn(io, socket, data, callback));
