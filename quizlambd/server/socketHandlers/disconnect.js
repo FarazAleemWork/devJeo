@@ -9,7 +9,7 @@ const hostReconnectTimers = {};
  * Handle socket disconnect event
  * Marks player/host disconnected, starts host timeout if needed
  */
-function handleDisconnect(socket) {
+function handleDisconnect(socket, callback) {
   const roomCode = socket.data?.roomCode;
   const playerId = socket.data?.playerId;
 
@@ -50,6 +50,7 @@ function handleDisconnect(socket) {
     });
   } else {
     // Notify players a player disconnected
+    callback({ success: true, message: 'You have disconnected' });
     socket.to(roomCode).emit('playerDisconnected', {
       playerId,
       message: 'A player has disconnected but may reconnect soon',
