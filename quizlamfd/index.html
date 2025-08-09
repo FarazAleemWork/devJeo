@@ -17,8 +17,7 @@
   <button onclick="selectQuestion()">Select Question</button></br>
   <button onclick="startGame()">Start Game</button>
   <button onclick="buzzIn()">Buzz In</button>
-  <input type="text" id="answerText" placeholder="Your Answer" />
-  <button onclick="submitAnswer()">Submit Answer</button>
+
 
   <hr />
 
@@ -54,7 +53,7 @@
         playerId = res.player.id;
         roomCode = res.room.roomCode;
         document.getElementById('roomCode').value = roomCode;
-        Console.log('created: ' + roomCode + 'by' + playerId )
+        console.log('created: ' + roomCode + 'by' + playerId )
       });
     }
 
@@ -79,14 +78,15 @@
 
     
     function selectQuestion() {
-      onsole.log('Select Question button clicked'); // Debugging log
-  const questionIndex = prompt('Enter question index (0, 1, 2, ...):');
-  if (questionIndex === null || questionIndex === '') {
-    console.log('No question index entered'); // Debugging log
-    return;
-  }
-  console.log('Room Code:', roomCode);
-  console.log('Question Index:', questionIndex);
+      console.log('Select Question button clicked'); // Debugging log
+      const questionIndex = prompt('Enter question index (0, 1, 2, ...):');
+     
+      if (questionIndex === null || questionIndex === '') {
+        console.log('No question index entered'); // Debugging log
+        return;
+      }
+      console.log('Room Code:', roomCode);
+      console.log('Question Index:', questionIndex);
 
   
       socket.emit('selectQuestion', { roomCode, questionIndex: parseInt(questionIndex) }, (res) => {
@@ -98,6 +98,14 @@
       });
     }
 
+    socket.on('questionSelected', (data) => {
+  if (data.buzzOpen) {
+    log('🔔 Buzzing is OPEN');
+  } else {
+    log('🔕 Buzzing is CLOSED');
+  }
+});
+
     function buzzIn() {
       socket.emit('buzzIn', { roomCode, playerId }, (res) => {
         if (res.error) return log('❌ ' + res.error);
@@ -105,20 +113,13 @@
       });
     }
 
-    function submitAnswer() {
-      const answer = document.getElementById('answerText').value;
-      socket.emit('submitAnswer', { roomCode, playerId, answer }, (res) => {
-        if (res.timeout) return log('⏰ Timeout: ' + res.message);
-        if (res.correct) log('✅ Correct Answer!');
-        else if (res.error) log('❌ ' + res.error);
-        else log('❌ Wrong Answer!');
-      });
-    }
-
+   
     function awardPoints() {
+      console.log('Award Points button clicked'); // Debugging log
       const points = parseInt(document.getElementById('pointsToAward').value);
       if (isNaN(points)) return log('❌ Invalid point value');
       socket.emit('awardPoints', { roomCode, playerId, points }, (res) => {
+        console.log('Server response:', res);
         if (res.error) return log('❌ ' + res.error);
         log('🏅 Awarded ' + points + ' points!');
       });
@@ -135,7 +136,7 @@
     socket.on('gameOver', (data) => log('🏁 Game over! Winner: ' + data.winner));
     socket.on('nextQuestion', (data) => log('➡️ Next question: ' + data.question));
     socket.on('playerJoined', (data) => log('👥 New player joined: ' + data.player.name));
-    socket.on('playerBuzzed', (data) => log('🟡 Buzzed: ' + data.player.name));
+    socket.on('playerBuzzed', (data) => log('🟡 Buzzed: ' + data.name));
     socket.on('playerAnswered', (data) => log('🗣️ Answered: ' + data.player.name));
     socket.on('pointsAwarded', (data) => log('🏆 Points awarded: ' + data.points + ' to ' + data.player.name));
     socket.on('error', (err) => log('❌ Error: ' + err.message));
@@ -145,6 +146,10 @@
     socket.on('reconnect', (attempt) => log('✅ Reconnected after ' + attempt + ' attempts'));
     socket.on('reconnect_error', (err) => log('❌ Reconnect error: ' + err.message));
     socket.on('reconnect_failed', () => log('❌ Reconnect failed'));
+    socket.on('questionSelected', (data) => {log(`➡️ Question Selected`)});
+    socket.on('gameStateUpdate', (gameState) => {log('📊 Game state updated: ' + JSON.stringify(gameState));});
+
+
 
 
 
