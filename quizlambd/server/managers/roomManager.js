@@ -17,14 +17,15 @@ function getRoom(roomCode) {
  * @param {string} hostName - The name of the host.
  * @returns {Object} - The created room object.
  */
-function createRoom(hostName) {
+function createRoom(hostName, hostSocketId) {
   let roomCode;
   do {
     roomCode = generateRoomCode();
   } while (rooms.getRoom(roomCode));
 
   const hostId = generatePlayerId();
-  const room = createRoomModel(roomCode, hostId, hostName);
+
+  const room = createRoomModel(roomCode, hostId, hostName, hostSocketId);
 
   // Add extra properties for tracking disconnections
   room.hostDisconnected = false;
