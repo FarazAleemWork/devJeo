@@ -5,7 +5,7 @@ const roomManager = require('../managers/roomManager');
 
 function handleCreateRoom(socket, data, callback) {
   console.log(data)
-  const room = roomManager.createRoom(socket.id, data.playerName);
+  const room = roomManager.createRoom(data.playerName);
 
   socket.join(room.roomCode);
   socket.emit('roomCreated', { roomId: room.roomCode });
