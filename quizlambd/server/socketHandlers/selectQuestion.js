@@ -6,15 +6,15 @@ function handleSelectQuestion(io, socket, data, callback) {
   const room = getRoom(roomCode);
   if (!room) return callback({ error: 'Room not found' });
 
-  // Only host can select a question
-  // if (socket.id !== room.host.id) {
-  //   return callback({ error: 'Only host can select a question' });
-  // }
+  //Only host can select a question
+  if (socket.id !== room.host.socketId) {
+    return callback({ error: 'Only host can select a question' });
+  }
 
-  // Make sure the question index is valid
-  // if (questionIndex < 0 || questionIndex >= room.questions.length) {
-  //   return callback({ error: 'Invalid question index' });
-  // }
+  //Make sure the question index is valid
+  if (questionIndex < 0 || questionIndex >= room.questions.length) {
+    return callback({ error: 'Invalid question index' });
+  }
 
   // Update room state
   room.currentQuestionIndex = questionIndex;
