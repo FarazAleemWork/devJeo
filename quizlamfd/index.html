@@ -99,12 +99,12 @@
     }
 
     socket.on('questionSelected', (data) => {
-  if (data.buzzOpen) {
-    log('🔔 Buzzing is OPEN');
-  } else {
-    log('🔕 Buzzing is CLOSED');
-  }
-});
+      if (data.buzzOpen) {
+        log('🔔 Buzzing is OPEN');
+      } else {
+        log('🔕 Buzzing is CLOSED');
+      }
+    });
 
     function buzzIn() {
       socket.emit('buzzIn', { roomCode, playerId }, (res) => {

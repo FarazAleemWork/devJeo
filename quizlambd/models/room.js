@@ -1,10 +1,11 @@
 // /models/room.js
-function createRoom(roomCode, hostId, hostName) {
+function createRoom(roomCode, hostId, hostName, hostSocketId) {
   return {
     roomCode,
     host: {
       id: hostId,
       name: hostName,
+      socketId: hostSocketId,
     },
     players: [],
      gameState: {
