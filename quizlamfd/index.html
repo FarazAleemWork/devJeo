@@ -8,7 +8,7 @@
 
   <input type="text" id="playerName" placeholder="Enter name" />
 </br>
-  <button onclick="createRoom()">Create Room</button>
+  <button onclick="createRoom()" id="createRoom">Create Room</button>
   <button onclick="joinRoom()">Join Room</button>
 
 <input type="text" id="roomCode" placeholder="Enter room code" />
@@ -33,6 +33,7 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const socket = io(); // connects to backend
+    const creatRoombuttonId = document.getElementById('createRoom');
 
     let playerId = null;
     let roomCode = null;
@@ -45,6 +46,7 @@
 
     function createRoom() {
       const name = document.getElementById('playerName').value;
+      
       log('Creating room, host: ' + name);
       
       socket.emit('createRoom', { playerName: name }, (res) => {
@@ -54,6 +56,7 @@
         roomCode = res.room.roomCode;
         document.getElementById('roomCode').value = roomCode;
         console.log('created: ' + roomCode + 'by' + playerId )
+        creatRoombuttonId.disabled = true;
       });
     }
 
@@ -64,7 +67,7 @@
         if (res.error) return log('❌ ' + res.error);
         playerId = res.player.id;
         roomCode = res.room.roomCode;
-
+        creatRoombuttonId.disabled = true;
         log('✅ Joined room: ' + ' Code: ' +code + ' Name: ' + name);
       });
     }
