@@ -44,9 +44,18 @@
       pre.scrollTop = pre.scrollHeight;
     }
 
+    function validateName(name){
+      if (!name || name.trim() === '') {
+        log('❌ Name cannot be empty');
+        return false;
+      }
+      return true;
+    }
+
     function createRoom() {
       const name = document.getElementById('playerName').value;
-      
+
+      if (!validateName(name)) return;
       log('Creating room, host: ' + name);
       
       socket.emit('createRoom', { playerName: name }, (res) => {
@@ -63,6 +72,9 @@
     function joinRoom() {
       const name = document.getElementById('playerName').value;
       const code = document.getElementById('roomCode').value;
+
+      if (!validateName(name)) return;
+
       socket.emit('joinRoom', { roomCode: code, playerName: name }, (res) => {
         if (res.error) return log('❌ ' + res.error);
         playerId = res.player.id;
