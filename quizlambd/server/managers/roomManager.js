@@ -44,6 +44,9 @@ function joinRoom(roomCode, name) {
   const room = getRoom(roomCode);
   if (!room) return { error: 'Room not found' };
 
+  if(name.trim() === "" ){
+    return {error: 'Name cannot be empty'}
+  }
   if (room.host.name === name) {
     return { error: 'Name already taken by host' };
   }
