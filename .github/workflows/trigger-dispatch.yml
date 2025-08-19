@@ -1,0 +1,18 @@
+name: Trigger CI/CD Deployment To Other Repo
+description: This workflow triggers a deployment in another repository using repository dispatch.
+
+on:
+  push:
+    branches:
+      - main   # Trigger on pushes to main branch
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository dispatch event to CI/CD repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CICD_DEPLOY_PAT }}          # Personal Access Token with repo scope
+          repository: FarazAleemWork/ci-cd-deployments   # Target repository for deployment
+          event-type: trigger-deployment                 # Custom event type to trigger deployment
