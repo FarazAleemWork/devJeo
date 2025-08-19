@@ -82,4 +82,4 @@ async function runAllGames() {
 runAllGames();
 
 //pushing random message to trigger CI/CD pipeline, this does nothing im just letting copilot finish my sentence
-console.log("Random message to trigger CI/CD pipeline");
+console.log("Random message to trigger CI/CD pipe");
