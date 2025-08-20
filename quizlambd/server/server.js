@@ -50,7 +50,7 @@ app.get('/test', (req, res) => {
   res.send('Test route works');
 });
 
-app.get('/{*any}', (req, res, next) => {
+app.get('*', (req, res, next) => {
   try {
    console.log('Resolved index.html path:', path.join(frontendPath, 'index.html'));
     res.sendFile(path.join(frontendPath, 'index.html'));
